@@ -5,7 +5,6 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
-    "@chakra-ui/react": "^2.8.1",
     "@date-io/date-fns": "^2.17.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -17,6 +16,7 @@
     "@testing-library/user-event": "^13.5.0",
     "date-fns": "^2.0.0-beta.5",
     "framer-motion": "^10.16.4",
+    "papaparse": "^5.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-multiselect-checkboxes": "0.1.1",

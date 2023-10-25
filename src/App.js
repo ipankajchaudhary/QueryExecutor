@@ -1,18 +1,65 @@
+// @ts-nocheck
 import TaskTable from "./components/TaskTable";
 import MainComponent from "./components/MainComponent";
-import data from "./data";
+import React, { Fragment } from "react";
+import InputScreen from "./components/InputComponent";
+import DATA from "./data";
 import { useState } from "react";
-
+import LoadingSpinner from "./components/Spinner";
+import "./styles.css"
+import { useEffect } from "react";
 
 function App() {
 
+
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState(null);
+  const [formData, setFormdata] = useState({});
   const [data, setdata] = useState([])
+  const handleFormSubmit = (formData) => {
+    console.log(formData)
+    setLoading(true);
+    setFormdata(formData);
+    fetch("http://127.0.0.1:3002/data", {
+      method: "POST",
+      body: JSON.stringify(formData),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+
+        setResponse(JSON.parse(data));
+        setdata(JSON.parse(data).result)
+        localStorage.setItem('data', data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert(error);
+      });
+  };
+  
 
   return (
-    <div className="container mt-5">
-      <MainComponent setdata={setdata}/>
-      <TaskTable data={data} />
-    </div>
+
+    <Fragment>
+      {/* <Titlebar /> */}
+      <div className="container">
+        {loading ? (
+          <LoadingSpinner />
+        ) : response ? (
+          // <TableComponent response={response} formData={formData} />
+          <>
+            <MainComponent response={response} formData={formData}/>
+          </>
+        ) : (
+          <InputScreen handleFormSubmit={handleFormSubmit} />
+        )}
+      </div>
+    </Fragment>
   );
 }
 

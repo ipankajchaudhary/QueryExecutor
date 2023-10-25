@@ -13,7 +13,7 @@ export const STATUSES = [
   STATUS_DEPLOYED,
 ];
 
-const data = [
+const DATA = [
   {
       "Measure": "CurrentDatePST",
       "DimensionName": "-",
@@ -1077,4 +1077,4 @@ const data = [
 //   ];
   
 //   export default DATA;
-export default data
+export default DATA;
