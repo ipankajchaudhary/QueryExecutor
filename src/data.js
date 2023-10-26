@@ -1,1080 +1,134 @@
-const STATUS_ON_DECK = { id: 1, name: "On Deck", color: "blue.300" };
-const STATUS_IN_PROGRESS = {
-  id: 2,
-  name: "In Progress",
-  color: "yellow.400",
-};
-const STATUS_TESTING = { id: 3, name: "Testing", color: "pink.300" };
-const STATUS_DEPLOYED = { id: 4, name: "Deployed", color: "green.300" };
-export const STATUSES = [
-  STATUS_ON_DECK,
-  STATUS_IN_PROGRESS,
-  STATUS_TESTING,
-  STATUS_DEPLOYED,
-];
+import React, { useState } from "react";
+import Papa from "papaparse";
+import "./styles.css";
 
-const DATA = [
-  {
-      "Measure": "CurrentDatePST",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Read Me",
-      "VisualName": "card",
-      "Query": "SELECT [Measures].[CurrentDatePST] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentDatePST",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Ingestion Pipeline Logs",
-      "VisualName": "card",
-      "Query": "SELECT [Measures].[CurrentDatePST] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "LastTimeRefresh(MAX) Ingestion(PST)",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Ingestion Pipeline Logs",
-      "VisualName": "tableEx",
-      "Query": "SELECT [Measures].[LastTimeRefresh(MAX) Ingestion(PST)] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentDatePST",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Ingestion Pipeline Backup Logs",
-      "VisualName": "card",
-      "Query": "SELECT [Measures].[CurrentDatePST] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentDatePST",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Summary Logs",
-      "VisualName": "card",
-      "Query": "SELECT [Measures].[CurrentDatePST] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentStatus(MAX)",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Summary Logs",
-      "VisualName": "tableEx",
-      "Query": "SELECT [Measures].[CurrentStatus(MAX)] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CombineDate",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Summary Logs",
-      "VisualName": "tableEx",
-      "Query": "SELECT [Measures].[CombineDate] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentDatePST",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Pipeline Backup Logs",
-      "VisualName": "card",
-      "Query": "SELECT [Measures].[CurrentDatePST] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "ColorCode_BackupPipelineExecutionlogs",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Pipeline Backup Logs",
-      "VisualName": "tableEx",
-      "Query": "SELECT [Measures].[ColorCode_BackupPipelineExecutionlogs] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentDatePST",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Dataset Logs",
-      "VisualName": "card",
-      "Query": "SELECT [Measures].[CurrentDatePST] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentDuration",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Dataset Logs",
-      "VisualName": "tableEx",
-      "Query": "SELECT [Measures].[CurrentDuration] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "Last Refresh Time Ingestion",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Summary Detailed Logs",
-      "VisualName": "pivotTable",
-      "Query": "SELECT [Measures].[Last Refresh Time Ingestion] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "EndTime(MAX)",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Summary Detailed Logs",
-      "VisualName": "tableEx",
-      "Query": "SELECT [Measures].[EndTime(MAX)] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentDuration",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Summary Detailed Logs",
-      "VisualName": "tableEx",
-      "Query": "SELECT [Measures].[CurrentDuration] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "StartTime(MAX)",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Summary Detailed Logs",
-      "VisualName": "tableEx",
-      "Query": "SELECT [Measures].[StartTime(MAX)] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentDatePST",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "1",
-      "ReportName": "Refresh Tracker",
-      "PageName": "Pipeline Logs",
-      "VisualName": "card",
-      "Query": "SELECT [Measures].[CurrentDatePST] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "ColorCode_BackupPipelineExecutionlogs",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": null,
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentStatusLatest Ingestion",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[CurrentStatusLatest Ingestion] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentStatus Ingestion",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[CurrentStatus Ingestion] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "TodaysStatus",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[TodaysStatus] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "ColorCode_DatasetRefreshHistory",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[ColorCode_DatasetRefreshHistory] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CurrentStatus",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[CurrentStatus] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "NextScheduleRefresh",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[NextScheduleRefresh] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "CombineStatus",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[CombineStatus] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "ColorCode_SummaryPage",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[ColorCode_SummaryPage] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "LastTimeRefresh(MAX) Ingestion",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[LastTimeRefresh(MAX) Ingestion] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "LastTimeRefresh(MAX)",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[LastTimeRefresh(MAX)] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "ColorCode_BackupPipelinelogs",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[ColorCode_BackupPipelinelogs] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "NextScheduleRefreshIngestion",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[NextScheduleRefreshIngestion] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "MetaCurrentStatus(MAX)",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[MetaCurrentStatus(MAX)] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "MetaCombineStatus",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[MetaCombineStatus] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "MetaCombineDate",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[MetaCombineDate] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "LastTimeRefresh(MAX) IN",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[LastTimeRefresh(MAX) IN] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "DateShow Ingestion",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[DateShow Ingestion] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "ColorCode_SummaryPage Ingestion Framework",
-      "DimensionName": "-",
-      "ColumnName": "-",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT [Measures].[ColorCode_SummaryPage Ingestion Framework] ON 0 FROM [Model]",
-      "hasDimension": "0"
-  },
-  {
-      "Measure": "DateShow",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[DateShow]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentStatus(MAX)",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentStatus(MAX)]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "NextScheduleRefresh",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[NextScheduleRefresh]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CombineStatus",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CombineStatus]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CombineDate",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CombineDate]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "ColorCode_SummaryPage",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[ColorCode_SummaryPage]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "LastTimeRefresh(MAX)",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[LastTimeRefresh(MAX)]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "DateShow Ingestion",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[DateShow Ingestion]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "Last Refresh Time Ingestion",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[Last Refresh Time Ingestion]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "LastTimeRefresh(MAX) Ingestion(PST)",
-      "DimensionName": "Stream Name Dimension",
-      "ColumnName": "StreamNameOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[LastTimeRefresh(MAX) Ingestion(PST)]} ON 0 ,NON EMPTY{[Stream Name Dimension].[StreamNameOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CombineStatus",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CombineStatus]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CombineDate",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CombineDate]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "StartTime(MAX)",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[StartTime(MAX)]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "EndTime(MAX)",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[EndTime(MAX)]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentDuration",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentDuration]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "ColorCode_DatasetRefreshHistory",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[ColorCode_DatasetRefreshHistory]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentStatus",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentStatus]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "MetaCombineDate",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[MetaCombineDate]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "MetaCombineStatus",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[MetaCombineStatus]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentStatus Ingestion",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentStatus Ingestion]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentStatusLatest Ingestion",
-      "DimensionName": "Pipeline Execution Logs",
-      "ColumnName": "StreamOrder",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentStatusLatest Ingestion]} ON 0 ,NON EMPTY{[Pipeline Execution Logs].[StreamOrder].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CombineStatus",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CombineStatus]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CombineDate",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CombineDate]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "StartTime(MAX)",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[StartTime(MAX)]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "EndTime(MAX)",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[EndTime(MAX)]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentDuration",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentDuration]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "ColorCode_DatasetRefreshHistory",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[ColorCode_DatasetRefreshHistory]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentStatus",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentStatus]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "MetaCombineDate",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[MetaCombineDate]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "MetaCombineStatus",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[MetaCombineStatus]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentStatus Ingestion",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentStatus Ingestion]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentStatusLatest Ingestion",
-      "DimensionName": "PipelineBackupLogs(Ingestion)",
-      "ColumnName": "StreamName",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentStatusLatest Ingestion]} ON 0 ,NON EMPTY{[PipelineBackupLogs(Ingestion)].[StreamName].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CombineStatus",
-      "DimensionName": "PipelineExecutionLogs(ingestion)",
-      "ColumnName": "Order",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CombineStatus]} ON 0 ,NON EMPTY{[PipelineExecutionLogs(ingestion)].[Order].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CombineDate",
-      "DimensionName": "PipelineExecutionLogs(ingestion)",
-      "ColumnName": "Order",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CombineDate]} ON 0 ,NON EMPTY{[PipelineExecutionLogs(ingestion)].[Order].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "StartTime(MAX)",
-      "DimensionName": "PipelineExecutionLogs(ingestion)",
-      "ColumnName": "Order",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[StartTime(MAX)]} ON 0 ,NON EMPTY{[PipelineExecutionLogs(ingestion)].[Order].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "EndTime(MAX)",
-      "DimensionName": "PipelineExecutionLogs(ingestion)",
-      "ColumnName": "Order",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[EndTime(MAX)]} ON 0 ,NON EMPTY{[PipelineExecutionLogs(ingestion)].[Order].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentDuration",
-      "DimensionName": "PipelineExecutionLogs(ingestion)",
-      "ColumnName": "Order",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentDuration]} ON 0 ,NON EMPTY{[PipelineExecutionLogs(ingestion)].[Order].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "ColorCode_DatasetRefreshHistory",
-      "DimensionName": "PipelineExecutionLogs(ingestion)",
-      "ColumnName": "Order",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[ColorCode_DatasetRefreshHistory]} ON 0 ,NON EMPTY{[PipelineExecutionLogs(ingestion)].[Order].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentStatus",
-      "DimensionName": "PipelineExecutionLogs(ingestion)",
-      "ColumnName": "Order",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentStatus]} ON 0 ,NON EMPTY{[PipelineExecutionLogs(ingestion)].[Order].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "MetaCombineDate",
-      "DimensionName": "PipelineExecutionLogs(ingestion)",
-      "ColumnName": "Order",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[MetaCombineDate]} ON 0 ,NON EMPTY{[PipelineExecutionLogs(ingestion)].[Order].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "CurrentStatusLatest Ingestion",
-      "DimensionName": "PipelineExecutionLogs(ingestion)",
-      "ColumnName": "Order",
-      "LoadTime": "0.01",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": "SELECT {[Measures].[CurrentStatusLatest Ingestion]} ON 0 ,NON EMPTY{[PipelineExecutionLogs(ingestion)].[Order].children} ON 1 FROM [Model]",
-      "hasDimension": "1"
-  },
-  {
-      "Measure": "MetaCombineStatus",
-      "DimensionName": "Stream Name Dimension Ingestion",
-      "ColumnName": null,
-      "LoadTime": "2",
-      "isMeasureUsedInVisual": "0",
-      "ReportName": "Refresh Tracker",
-      "PageName": "-",
-      "VisualName": "-",
-      "Query": null,
-      "hasDimension": "1"
-  }
-]
+import csvFile from './df.csv'
 
+// Allowed extensions for input file
+const allowedExtensions = ["csv"];
 
-// const DATA = [
-//     {
-//       task: "Add a New Feature",
-//       status: STATUS_ON_DECK,
-//       due: new Date("2023/10/15"),
-//       notes: "This is a note",
-//     },
-//     {
-//       task: "Write Integration Tests",
-//       status: STATUS_IN_PROGRESS,
-//       due: null,
-//       notes: "Use Jest",
-//     },
-//     {
-//       task: "Add Instagram Integration",
-//       status: STATUS_DEPLOYED,
-//       due: null,
-//       notes: "",
-//     },
-//     {
-//       task: "Cleanup Database",
-//       status: null,
-//       due: new Date("2023/02/15"),
-//       notes: "Remove old data",
-//     },
-//     {
-//       task: "Refactor API Endpoints",
-//       status: STATUS_TESTING,
-//       due: null,
-//       notes: "",
-//     },
-//     {
-//       task: "Add Documentation to API",
-//       status: null,
-//       due: new Date("2023/09/12"),
-//       notes: "Add JS Docs to all endpoints",
-//     },
-//     {
-//       task: "Update NPM Packages",
-//       status: STATUS_IN_PROGRESS,
-//       due: null,
-//       notes: "Upgrade React & Chakra UI",
-//     },
-//     {
-//       task: "Optimize Database Queries",
-//       status: STATUS_IN_PROGRESS,
-//       due: null,
-//       notes: "Optimize slow queries.",
-//     },
-//     {
-//       task: "Implement User Authentication",
-//       status: STATUS_ON_DECK,
-//       due: new Date("2023/11/08"),
-//       notes: "OAuth2 and JWT auth.",
-//     },
-//     {
-//       task: "Design User Interface Mockups",
-//       status: null,
-//       due: new Date("2023/09/30"),
-//       notes: "Create UI mockups.",
-//     },
-//     {
-//       task: "Fix Cross-Browser Compatibility Issues",
-//       status: STATUS_IN_PROGRESS,
-//       due: null,
-//       notes: "Resolve browser issues.",
-//     },
-//     {
-//       task: "Perform Security Audit",
-//       status: null,
-//       due: new Date("2023/10/22"),
-//       notes: "Security audit.",
-//     },
-//     {
-//       task: "Create User Onboarding Tutorial",
-//       status: STATUS_ON_DECK,
-//       due: new Date("2023/11/15"),
-//       notes: "User onboarding guide.",
-//     },
-//     {
-//       task: "Optimize Frontend Performance",
-//       status: STATUS_IN_PROGRESS,
-//       due: null,
-//       notes: "Improve performance.",
-//     },
-//     {
-//       task: "Conduct Code Review",
-//       status: null,
-//       due: new Date("2023/10/05"),
-//       notes: "Code review meeting.",
-//     },
-//     {
-//       task: "Implement Continuous Integration",
-//       status: STATUS_ON_DECK,
-//       due: new Date("2023/11/01"),
-//       notes: "Set up CI/CD pipelines.",
-//     },
-//     {
-//       task: "Migrate to Cloud Hosting",
-//       status: STATUS_DEPLOYED,
-//       due: null,
-//       notes: "Cloud migration.",
-//     },
-//     {
-//       task: "Create User Feedback Survey",
-//       status: null,
-//       due: new Date("2023/09/25"),
-//       notes: "User feedback survey.",
-//     },
-//     {
-//       task: "Update User Documentation",
-//       status: STATUS_TESTING,
-//       due: null,
-//       notes: "Revise documentation.",
-//     },
-//     {
-//       task: "Bug Fixing and QA Testing",
-//       status: null,
-//       due: new Date("2023/10/10"),
-//       notes: "Fix bugs and QA.",
-//     },
-//     {
-//       task: "Implement Mobile App Support",
-//       status: STATUS_IN_PROGRESS,
-//       due: null,
-//       notes: "Add mobile support.",
-//     },
-//     {
-//       task: "Refine User Permission System",
-//       status: null,
-//       due: new Date("2023/09/18"),
-//       notes: "Enhance permissions.",
-//     },
-//   ];
+const App = () => {
+
+	// This state will store the parsed data
+	const [data, setData] = useState({});
+
+	// It state will contain the error when
+	// correct file extension is not used
+	const [error, setError] = useState("");
+
+	// It will store the file uploaded by the user
+	const [file, setFile] = useState("");
+
+	// This function will be called when
+	// the file input changes
+	const handleFileChange = (e) => {
+		setError("");
+    console.log(e)
+		// Check if user has entered the file
+		if (e.target.files.length) {
+			const inputFile = e.target.files[0];
+
+			// Check the file extensions, if it not
+			// included in the allowed extensions
+			// we show the error
+			const fileExtension =
+				inputFile?.type.split("/")[1];
+			if (
+				!allowedExtensions.includes(fileExtension)
+			) {
+				setError("Please input a csv file");
+				return;
+			}
+
+			// If input type is correct set the state
+			setFile(inputFile);
+		}
+	};
+  const handleParse = () => {
+    // If user clicks the parse button without a file we show an error
+    // Initialize a reader which allows users to read any file or blob.
+    // const reader = new FileReader();
+    // let fs = require('fs');
+    // let file = fs.createReadStream('C:\\Users\\Pankaj Chaudhary\\Desktop\\CIP\\cipold\\LoadMetric\\df.csv');
   
-//   export default DATA;
-export default DATA;
+    // Event listener on the reader when the file loads, we parse it and set the data.
+    // reader.onload = async ({ target }) => {
+      const csv = Papa.parse(csvFile, {
+        complete: (results, file) => {
+          console.log(results.data);
+          const transformedArray = results.data.map((item) => {
+            return {
+              Measure: item[1], // The second element in the array
+              DimensionName: item[2], // The third element in the array
+              ColumnName : item[3],
+              LoadTime : item[4],
+              isMeasureUsedInVisual : item[5],
+              ReportName : item[6],
+              PageName : item[7],
+              VisualName : item[8],
+              Query : item[9],
+              hasDimensio : item[10]
+            };
+          });
+          setData(transformedArray)
+          
+        },
+        download: true,
+        error: (error, file) => {
+          console.log('Error while parsing:', error, file);
+        },
+      });
+      // const parsedData = csv?.data;
+      // console.log(parsedData)
+  
+      // if (parsedData && parsedData.length > 0) {
+      //   // Here, we set the data state with the parsed data directly
+      //   setData(parsedData);
+      // } else {
+      //   // Handle the case where the CSV data is empty or couldn't be parsed
+      //   setError("Unable to parse the CSV data.");
+      // }
+    };
+  
+    // reader.readAsText(file);
+  // };
+  
+  console.log(data)
+
+	return (
+		<div className="data">
+			<h1 className="geeks">GeeksforGeeks</h1>
+			<h3>Read CSV file in React</h3>
+			<div className="container">
+				<label
+					htmlFor="csvInput"
+					style={{ display: "block" }}
+				>
+					Enter CSV File
+				</label>
+				<input
+					onChange={handleFileChange}
+					id="csvInput"
+					name="file"
+					type="File"
+				/>
+				<div>
+					<button onClick={handleParse}>
+						Parse
+					</button>
+				</div>
+				{/* <div style={{ marginTop: "3rem" }}>
+					{error
+						? error
+						: data.map((e, i) => (
+							<div key={i} className="item">
+								{e[0]}:{e[1]}
+							</div>
+						))}
+				</div> */}
+			</div>
+		</div>
+	);
+};
+
+export default App;

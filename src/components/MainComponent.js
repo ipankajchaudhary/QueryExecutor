@@ -1,9 +1,10 @@
+// @ts-nocheck
 import React, { useEffect, useState } from "react";
-import data from "../data";
+// import data from "../data";
 import ReactMultiSelectCheckboxes from "react-multiselect-checkboxes";
 import { Popover } from "react-tiny-popover";
 
-const MainComponent = ({ setdata }) => {
+const MainComponent = ({ setdata , data}) => {
   const uniqueMeasures = new Set();
   const uniqueDimensionNames = new Set();
   const uniqueReportNames = new Set();
@@ -82,27 +83,20 @@ const MainComponent = ({ setdata }) => {
     // console.log(filtered)
     setFilteredData(filtered);
     setdata(filtered);
-    if(thresholdfilterChecked == false){
-      const filteredcheckboxData = filteredData.filter((item) => item.isMeasureUsedInVisual !== "1")
-      console.log(filteredcheckboxData)
-      setFilteredData(filteredcheckboxData)
-      setdata(filteredData);
-    }
-    else{
-      const filteredcheckboxData = filteredData.filter((item) => item.isMeasureUsedInVisual === "1")
-      console.log(filteredcheckboxData)
+    // if(thresholdfilterChecked == false){
+    //   const filteredcheckboxData = filteredData.filter((item) => item.isMeasureUsedInVisual !== "1")
+    //   console.log(filteredcheckboxData)
+    //   setFilteredData(filteredcheckboxData)
+    //   setdata(filteredData);
+    // }
+    // else{
+    //   const filteredcheckboxData = filteredData.filter((item) => item.isMeasureUsedInVisual === "1")
+    //   console.log(filteredcheckboxData)
 
-      setFilteredData(filteredcheckboxData);
-      setdata(filteredData);
-    }
+    //   setFilteredData(filteredcheckboxData);
+    //   setdata(filteredData);
+    // }
 
-
-
-
-
-
-
- 
     // setSelectedMeasures(selectedMeasures)
     // setSelectedDimensionNames(selectedDimensionNames)
     // setSelectedVisualNames(selectedVisualNames)
